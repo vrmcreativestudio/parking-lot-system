@@ -1,0 +1,60 @@
+
+.alert-info-container {
+  position: fixed;
+  top: 62px;
+  left: 50%;
+  right: 50%;
+  transform: translate(-50%, 0);
+  z-index: 100;
+
+  animation: fadeDown 0.5s;
+}
+
+.hidden {
+  display: none;
+}
+
+@keyframes fadeDown {
+  from {
+    transform: translate(-50%, -100%);
+    opacity: 0.25;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+.alert-info-container .alert {
+  margin: 0;
+}
+.alert-info-container .timer-container {
+  position: relative;
+  float: left;
+  width: 100%;
+  bottom: 5px;
+}
+.alert-info-container .timer-container .timer-background {
+  background-color: #00000031;
+  width: 100%;
+  height: 5px;
+}
+.alert-info-container .timer-container .timer-value {
+  height: 5px;
+  position: absolute;
+}
+.alert-info-container .alert-primary .timer-value {
+  background-color: var(--bs-primary);
+}
+.alert-info-container .alert-success .timer-value {
+  background-color: var(--bs-success);
+}
+.alert-info-container .alert-warning .timer-value {
+  background-color: var(--bs-warning);
+}
+.alert-info-container .alert-danger .timer-value {
+  background-color: var(--bs-danger);
+}
+.alert-info-container .alert-info .timer-value {
+  background-color: var(--bs-info);
+}

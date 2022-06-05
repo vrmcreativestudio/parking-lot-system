@@ -1,0 +1,65 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.entry-point,
+.parking-lot {
+  padding: 0;
+  background-color: transparent;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+.entry-point.btn,
+.parking-lot .btn {
+  width: 100%;
+  height: 100%;
+  border: 1px solid;
+}
+
+.parking-lot-table {
+  border: none;
+  text-align: center;
+  vertical-align: middle;
+}
+.parking-lot-table tbody td:first-child {
+  width: 40px;
+  vertical-align: middle;
+}
+.parking-lot-table tbody td:not(:first-child),
+.parking-lot-table tbody th,
+.parking-lot-table tbody tr,
+.parking-lot-table tbody thead {
+  border-color: transparent !important;
+  height: 100px;
+  width: 150px;
+}
+.parking-lot-table thead {
+  border-color: transparent !important;
+  border-bottom-width: 2px;
+}
+
+.my-form {
+  border: 3px dashed #e9ecef;
+  padding: 14px 20px 0px;
+  margin-top: 15px;
+}
+.my-form-admin-header {
+  position: absolute;
+  background-color: #fff;
+  top: -14px;
+  left: 4px;
+  padding: 0 10px;
+  max-width: calc(90% - (20px + 10px));
+}
+.pos-relative {
+  position: relative;
+}
+
+.btn.occupied {
+  color: #198754 !important;
+}
+.btn.not-occupied {
+  color: #dc3545 !important;
+}
