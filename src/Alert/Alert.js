@@ -20,7 +20,7 @@ function Alert(props) {
       closeAlert();
 
     beginCloseTimeout();
-  }, [counter]);
+  }, [counter, transDate, closeTimeout]);
 
   const closeAlert = () => {
     clearTimeout(closeTimeout);

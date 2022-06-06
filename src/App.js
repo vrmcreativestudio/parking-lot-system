@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import './css/App.css';
 
-import { Container, Form, InputGroup, Nav, Navbar, Table } from 'react-bootstrap';
+import { Container, Form, InputGroup, Navbar, Table } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import ParkingLot from './class/ParkingLot';
@@ -27,6 +27,8 @@ const defaultData = {
 function App() {
   const [parkingLots, setParkingLots] = useState([]);
   const [mapGrid, setMapGrid] = useState(default_mapGrid);
+  const [parkingLotTypes, setParkingLotTypes] = useState(defaultData.parking_lot_types);
+  const [entryPoints, setEntryPoints] = useState(defaultData.entry_points);
 
   const [newVehicleType, setNewVehicleType] = useState('s');
   const [newVehiclePlate, setNewVehiclePlate] = useState('');
@@ -34,7 +36,7 @@ function App() {
   useEffect(() => {
     if (parkingLots.length === 0) {
       let numberOfParkingLots = 0;
-      Object.values(defaultData.parking_lot_types).forEach((p_lot_type) => {
+      Object.values(parkingLotTypes).forEach((p_lot_type) => {
         numberOfParkingLots += p_lot_type.size;
       });
 
@@ -48,25 +50,25 @@ function App() {
           posX++;
           p_lot_types_count++;
 
-          const parkingLot = new ParkingLot({ type: defaultData.parking_lot_types[p_lot_curr]?.type, position: { x: posX, y: posY } });
+          const parkingLot = new ParkingLot({ type: parkingLotTypes[p_lot_curr]?.type, position: { x: posX, y: posY } });
           setParkingLots(prev => [...prev, parkingLot]);
         
           if (posX === mapGrid.x) {
             posY++;
             posX = 0;
           }
-          if (p_lot_types_count === defaultData.parking_lot_types[p_lot_curr]?.size) {
+          if (p_lot_types_count === parkingLotTypes[p_lot_curr]?.size) {
             p_lot_curr++;
             p_lot_types_count = 0;
           }
         }
       }
     }
-  }, [parkingLots]);
+  }, [parkingLots, mapGrid, parkingLotTypes, entryPoints]);
 
   const displayEntryPoint = (posX, posY) => {
     let displayElement;
-    Object.values(defaultData.entry_points).forEach((entry) => {
+    Object.values(entryPoints).forEach((entry) => {
       if (entry.pos.x === posX && entry.pos.y === posY) {
         displayElement = (<button className="entry-point btn btn-outline-primary" onClick={() => enterNewVehicle(entry)}>
             <FontAwesomeIcon icon="fa-solid fa-door-open" size="2x" />
@@ -95,7 +97,9 @@ function App() {
               {
                 (yindex === 0) ? [...Array(mapGrid.x)].map((xvalue, xindex) => <td key={xindex}>{displayEntryPoint(0, xindex+1)}</td>) :
                 parkingLots.slice((yindex-1) * mapGrid.x, ((yindex-1) * mapGrid.x) + mapGrid.x).map((plvalue, plindex) => {
-                  return <td key={plindex}><div className="parking-lot" onClick={() => removeVehicle(plvalue)}>{plvalue?.render()}</div></td>
+                  if (plvalue?.type) {
+                    return <td key={plindex}><div className="parking-lot" onClick={() => removeVehicle(plvalue)}>{plvalue?.render()}</div></td>
+                  }
                 })
               }
             </tr>
@@ -208,10 +212,158 @@ function App() {
     <>
       <Navbar collapseOnSelect expand="lg" variant="dark" bg="dark">
         <Container>
-          <Navbar.Brand href="/"><FontAwesomeIcon icon="fa-solid fa-building" /> Parking Lot</Navbar.Brand>
+          <Navbar.Brand href="/parking-lot-system"><FontAwesomeIcon icon="fa-solid fa-building" /> Parking Lot</Navbar.Brand>
         </Container>
       </Navbar>
 
+      <div id="#admin">
+        <Container className="mt-4">
+          <div className="new-vehicle my-form pos-relative mb-3 mt-4 col-12">
+            <h5 className="my-form-admin-header text-truncate">Admin</h5>
+            <Form>
+              <div className="row">
+                <Form.Group className="mb-3 col-12 col-xs-12 col-sm-12 col-md-8 col-lg-4" controlId="formVehicleType">
+                  <Form.Label>Map Grid Size</Form.Label>
+                  <div className="row">
+                    <div className="col-6">
+                      <InputGroup>
+                        <Form.Control type="number"
+                          value={mapGrid.x}
+                          onChange={
+                            (e) => setMapGrid(prev => {
+                              e.preventDefault();
+                              setParkingLots([]);
+                              prev.x = (e.target.value*1);
+                              return prev;
+                            })
+                          }
+                          />
+                        <InputGroup.Text>Pos X</InputGroup.Text>
+                      </InputGroup>
+                    </div>
+                    <div className="col-6">
+                      <InputGroup>
+                        <Form.Control type="number"
+                          value={mapGrid.y}
+                          onChange={
+                            (e) => setMapGrid(prev => {
+                              e.preventDefault();
+                              setParkingLots([]);
+                              prev.y = (e.target.value*1);
+                              return prev;
+                            })
+                          }
+                          />
+                        <InputGroup.Text>Pos Y</InputGroup.Text>
+                      </InputGroup>
+                    </div>
+                  </div>
+                </Form.Group>
+                <Form.Group className="mb-3 col-12" controlId="formVehicleType">
+                  <Form.Label>Parking Lot Types and Sizes</Form.Label>
+                  <div className="row">
+                    <div className="col-12 col-xs-12 col-sm-6 col-md-4 col-lg-3 mb-2">
+                      <InputGroup>
+                        <Form.Control type="number"
+                          value={parkingLotTypes[0].size}
+                          onChange={
+                            (e) => setParkingLotTypes(prev => {
+                              e.preventDefault();
+                              setParkingLots([]);
+                              prev[0].size = (e.target.value*1);
+                              return prev;
+                            })
+                          }
+                          />
+                        <InputGroup.Text><FontAwesomeIcon icon="fa-solid fa-car-side" /> Small</InputGroup.Text>
+                      </InputGroup>
+                    </div>
+                    <div className="col-12 col-xs-12 col-sm-6 col-md-4 col-lg-3 mb-2">
+                      <InputGroup>
+                        <Form.Control type="number"
+                          value={parkingLotTypes[1].size}
+                          onChange={
+                            (e) => setParkingLotTypes(prev => {
+                              e.preventDefault();
+                              setParkingLots([]);
+                              prev[1].size = (e.target.value*1);
+                              return prev;
+                            })
+                          }
+                          />
+                        <InputGroup.Text><FontAwesomeIcon icon="fa-solid fa-van-shuttle" /> Medium</InputGroup.Text>
+                      </InputGroup>
+                    </div>
+                    <div className="col-12 col-xs-12 col-sm-6 col-md-4 col-lg-3 mb-2">
+                      <InputGroup>
+                        <Form.Control type="number"
+                          value={parkingLotTypes[2].size}
+                          onChange={
+                            (e) => setParkingLotTypes(prev => {
+                              e.preventDefault();
+                              setParkingLots([]);
+                              prev[2].size = (e.target.value*1);
+                              return prev;
+                            })
+                          }
+                          />
+                        <InputGroup.Text><FontAwesomeIcon icon="fa-solid fa-truck" /> Large</InputGroup.Text>
+                      </InputGroup>
+                    </div>
+                  </div>
+                </Form.Group>
+                <Form.Group className="mb-3 col-12" controlId="formVehicleType">
+                  <Form.Label>Entry Points</Form.Label>
+                  <div className="row">
+                    {(entryPoints.length > 0) ? (entryPoints.map((value, index) => {
+                      return (
+                        <div className="col-12 col-xs-12 col-sm-6 col-md-6 col-lg-3" key={index}>
+                          <InputGroup className="mb-2">
+                            <Form.Control type="text" value={value.name} onChange={(e) => 
+                              setEntryPoints(prev => {
+                                prev[index].name = e.target.value;
+                                setParkingLots([]);
+                                return prev;
+                              })
+                            } />
+                            <InputGroup.Text>Name</InputGroup.Text>
+                          </InputGroup>
+                          <InputGroup className="mb-2">
+                            <Form.Control type="number" value={value.pos.x} onChange={(e) => 
+                              setEntryPoints(prev => {
+                                prev[index].pos.x = (e.target.value*1);
+                                setParkingLots([]);
+                                return prev;
+                              })
+                            } />
+                            <InputGroup.Text>Pos X</InputGroup.Text>
+                          </InputGroup>
+                          <InputGroup className="mb-2">
+                            <Form.Control type="number" value={value.pos.y} onChange={(e) => 
+                              setEntryPoints(prev => {
+                                prev[index].pos.y = (e.target.value*1);
+                                setParkingLots([]);
+                                return prev;
+                              })
+                            } />
+                            <InputGroup.Text>Pos Y</InputGroup.Text>
+                          </InputGroup>
+                        </div>
+                      );
+                    })) : <h5>No Entry Points</h5>}
+                    <button className="btn btn-primary" onClick={(e) => setEntryPoints(prev => {
+                      e.preventDefault();
+                      prev.push({name: "New " + (entryPoints.length+1), pos: {x: 0, y: 0}});
+                      setParkingLots([]);
+                      return prev;
+                    })}>Add new Entry Points</button>
+                  </div>
+                </Form.Group>
+              </div>
+            </Form>
+          </div>
+        </Container>
+      </div>
       <div id="#home">
         <Container className="mt-4">
           <h3>Welcome to Object Oriented Mall!</h3>
@@ -247,40 +399,6 @@ function App() {
           <div className="new-vehicle my-form pos-relative mb-3 mt-4 col-12">
             <h5 className="my-form-admin-header text-truncate">Parking Lot</h5>
             { (parkingLots?.length > 0) ? displayParkingLot() : <div>No Parking Lot</div> }
-          </div>
-        </Container>
-      </div>
-      <div id="#admin">
-        <Container className="mt-4">
-          <div className="new-vehicle my-form pos-relative mb-3 mt-4 col-12">
-            <h5 className="my-form-admin-header text-truncate">Admin</h5>
-            <Form>
-              <div className="row">
-                <Form.Group className="mb-3 col-12 col-xs-12 col-sm-12 col-md-5 col-lg-4" controlId="formVehicleType">
-                  <Form.Label>Map Grid Size</Form.Label>
-                  <div className="row">
-                    <div className="col-6">
-                      <InputGroup>
-                        <Form.Control type="number"
-                          />
-                        <InputGroup.Text>x position</InputGroup.Text>
-                      </InputGroup>
-                    </div>
-                    <div className="col-6">
-                      <InputGroup>
-                        <Form.Control type="number"
-                          />
-                        <InputGroup.Text>y position</InputGroup.Text>
-                      </InputGroup>
-                    </div>
-                  </div>
-                </Form.Group>
-                <Form.Group className="mb-3 col-12 col-xs-12 col-sm-12 col-md-12 col-lg-12" controlId="formVehicleType">
-                  <Form.Label>Entry Points</Form.Label>
-                  
-                </Form.Group>
-              </div>
-            </Form>
           </div>
         </Container>
       </div>
